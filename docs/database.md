@@ -1,8 +1,8 @@
 # Database model
 
-Phase 3 defines the correct base e-commerce model. Phase 4 adds authentication automation, and
-Phase 5 adds RLS to every current public table. The schema still contains no bug definitions,
-reports, or deliberate defects.
+Phase 3 defines the correct base e-commerce model. Phase 4 adds authentication automation, Phase 5
+adds RLS to every current public table, and Phase 8 adds transactional checkout. The schema still
+contains no bug definitions, reports, or deliberate defects.
 
 ## Relationships
 
@@ -74,6 +74,10 @@ total = subtotal - discount + shipping_cost
 No card number, CVV, or real payment token is stored. Payment methods are limited to
 `simulated_card` and `simulated_transfer`.
 
+Phase 8 restricts shipping to `standard` or `express` and adds a globally unique, required
+`checkout_request_id` UUID. The value makes retries idempotent without exposing sequential order
+identifiers. Shipping fields also receive explicit length bounds.
+
 `order_items` snapshots `product_name`, `unit_price`, quantity, and line total. Its product reference
 uses `ON DELETE SET NULL`, so deleting a catalog product cannot destroy or alter historical order
 details. Deleting an Auth user similarly nulls `orders.user_id` through profile deletion while the
@@ -94,7 +98,18 @@ One `public.set_updated_at()` trigger function updates `updated_at` on `profiles
 - `(user_id, created_at desc)` supports per-user order history; a date index supports admin history.
 - Foreign-key lookup indexes exist for product references in cart and order items.
 - Unique constraints already provide indexes for category/product slugs, usernames, and coupon codes;
-  duplicate indexes are intentionally omitted.
+duplicate indexes are intentionally omitted.
+
+## Checkout functions
+
+`private.checkout_shipping_cost(text)` is the authoritative shipping rule. The authenticated-only
+`public.manage_cart_coupon(...)` RPC prices the caller's active cart and persists or removes its
+coupon. `public.perform_checkout(...)` locks the caller's cart, items, products, and coupon, then
+creates snapshots, decrements stock, and converts the cart in one transaction.
+
+Both public RPCs are narrowly scoped `SECURITY DEFINER` functions with an empty `search_path` and
+ownership derived from `auth.uid()`. See `checkout.md` for their lock order, rollback behavior, and
+idempotency design.
 
 ## Seed data
 

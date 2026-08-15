@@ -4,9 +4,9 @@ MercadoBugs is a fictitious e-commerce application for software testing practice
 
 ## Current status
 
-Phase 7 provides the deployed React application, reproducible local Supabase stack, versioned
-e-commerce schema, authentication, complete Row Level Security, a functional product catalog, and a
-persistent per-user cart. Checkout remains intentionally unimplemented until its phase.
+Phase 8 provides the deployed React application, reproducible local Supabase stack, versioned
+e-commerce schema, authentication, complete Row Level Security, product catalog, persistent cart,
+server-validated coupons, and an atomic/idempotent simulated checkout.
 
 ## Architecture
 
@@ -182,7 +182,15 @@ behavior, manual test cases, and the correct baseline that precedes BUG-005.
 Authenticated users can add products, change quantities within current stock, remove lines, and
 empty their persistent cart at `/#/cart`. The navbar count, line subtotals, and general subtotal share
 the same user-scoped TanStack Query data. See `docs/cart.md` for lazy creation, concurrency behavior,
-RLS boundaries, and the checkout stock responsibility reserved for Phase 8.
+RLS boundaries, and the boundary with checkout's final stock validation.
+
+## Checkout
+
+Authenticated users can apply a persisted coupon in `/#/cart`, complete a simulated checkout at
+`/#/checkout`, and refresh the minimal confirmation route. Prices, coupon dates, stock, shipping,
+totals, order snapshots, and cart conversion are recalculated atomically by PostgreSQL through
+authenticated Edge Functions. See `docs/checkout.md` for locks, rollback, idempotency, security,
+tests, and deploy commands.
 
 ## Safety notice
 

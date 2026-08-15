@@ -85,7 +85,15 @@ export function CartPage() {
         <ul className="cart-items" aria-label="Productos en el carrito">
           {items.map((item) => <CartItemRow item={item} key={item.id} userId={userId} />)}
         </ul>
-        <CartSummary totals={totals} />
+        <CartSummary
+          canCheckout={items.every((item) => Boolean(item.product && item.product.stock >= item.quantity))}
+          cartVersion={[
+            cart?.updatedAt ?? 'none',
+            ...items.map((item) => `${item.id}:${item.quantity}:${item.updatedAt}`),
+          ].join('|')}
+          totals={totals}
+          userId={userId}
+        />
       </div>
 
       {showClearDialog && (

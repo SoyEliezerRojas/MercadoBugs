@@ -12,7 +12,7 @@ Data API. React route guards still improve navigation, but they do not grant dat
 | `profiles` | None | Read own profile; update own `username` | Read all profiles; update any `username` |
 | `categories` | Read active rows | Read active rows | Read and manage all rows |
 | `products` | Read active rows | Read active rows | Read and manage all rows |
-| `carts` | None | Create, read, update, and delete own carts | Read all carts |
+| `carts` | None | Create, read, and delete own carts; coupon/lifecycle via trusted RPC | Read all carts |
 | `cart_items` | None | Create, read, update, and delete items in own carts | Read all cart items |
 | `coupons` | None | None | Read and manage all coupons |
 | `orders` | None | Read own orders | Read all orders |
@@ -44,8 +44,9 @@ Anonymous and authenticated visitors can only select active categories and produ
 can also see inactive entries and manage the catalog.
 
 Coupon rows are completely hidden from anonymous and tester sessions. This prevents clients from
-enumerating codes such as the expired `OLD20` seed. Coupon validation and attaching a coupon to a
-cart belong in trusted checkout logic, so browser sessions cannot insert or update `carts.coupon_id`.
+enumerating codes such as the expired `OLD20` seed. Phase 8 validates and attaches one submitted
+code through `manage_cart_coupon`; the RPC obtains ownership from `auth.uid()` and never returns the
+coupon table.
 
 ## Ownership boundaries
 
@@ -54,8 +55,17 @@ move an item to, update an item in, or delete an item from another user's cart. 
 check the resulting owner, which prevents transferring a cart to another user.
 
 Order rows and their snapshots are read-only through browser sessions. Testers can read only their
-own history; administrators can read all history. Order creation will be implemented as trusted,
-server-side checkout logic in a later phase.
+own history; administrators can read all history. Order creation and stock updates occur only
+through the authenticated `perform_checkout` RPC behind the checkout Edge Function. Direct browser
+inserts into `orders` and direct tester updates to `products` remain blocked.
+
+## Trusted checkout boundary
+
+The Edge Functions use the publishable/anonymous client configuration with the caller's JWT; they
+do not load `service_role`. They call `auth.getUser()` before invoking an authenticated-only RPC.
+Both checkout RPCs are `SECURITY DEFINER`, use `search_path = ''`, qualify every relation, reject a
+missing `auth.uid()`, and accept no arbitrary owner UUID. Their elevated write access is limited to
+the caller's active cart and the products/coupon referenced by that cart.
 
 ## Operational rules
 

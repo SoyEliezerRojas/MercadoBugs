@@ -113,6 +113,20 @@ create migration -> reset and test locally -> db push --dry-run -> review -> db 
 
 Database migrations are deliberately not executed by GitHub Actions.
 
+### Edge Functions
+
+Phase 8 adds two functions that are deployed separately from GitHub Pages:
+
+```powershell
+npx supabase functions deploy validate-coupon --project-ref eaouxnecjovvypayixff
+npx supabase functions deploy checkout --project-ref eaouxnecjovvypayixff
+npx supabase functions list --project-ref eaouxnecjovvypayixff
+```
+
+Their CORS allowlist already includes the production GitHub Pages origin. No custom secret and no
+`service_role` secret is required; Supabase provides the project URL and anonymous key to the Edge
+runtime, while each browser request supplies its own user access token.
+
 ## First Cloud administrator
 
 Register the account through MercadoBugs first. The Auth trigger creates its profile as `tester`.
