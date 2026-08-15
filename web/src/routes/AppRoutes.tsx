@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { LoginPage } from '../features/auth/LoginPage'
 import { RegisterPage } from '../features/auth/RegisterPage'
+import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage'
+import { ProductsPage } from '../features/catalog/pages/ProductsPage'
 import { AdminRoute } from './AdminRoute'
 import { ForbiddenPage } from './ForbiddenPage'
 import { HomePage } from './HomePage'
@@ -9,11 +11,6 @@ import { NotFoundPage } from './NotFoundPage'
 import { PhasePlaceholderPage } from './PhasePlaceholderPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
-
-const publicRoutes = [
-  { path: 'products', title: 'Catálogo de productos', phase: 6, description: 'Búsqueda, filtros y ordenamiento del catálogo.' },
-  { path: 'products/:id', title: 'Detalle de producto', phase: 6, description: 'Información completa de cada producto.' },
-] as const
 
 const authenticatedRoutes = [
   { path: 'cart', title: 'Tu carrito', phase: 7, description: 'Productos, cantidades y totales persistentes.' },
@@ -43,19 +40,8 @@ export function AppRoutes() {
           <Route path="register" element={<RegisterPage />} />
         </Route>
 
-        {publicRoutes.map((route) => (
-          <Route
-            element={
-              <PhasePlaceholderPage
-                description={route.description}
-                phase={route.phase}
-                title={route.title}
-              />
-            }
-            key={route.path}
-            path={route.path}
-          />
-        ))}
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="products/:id" element={<ProductDetailPage />} />
 
         <Route element={<ProtectedRoute />}>
           {authenticatedRoutes.map((route) => (

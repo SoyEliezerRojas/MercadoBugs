@@ -4,10 +4,10 @@ MercadoBugs is a fictitious e-commerce application for software testing practice
 
 ## Current status
 
-Phase 5.5 adds the first Internet deployment to the React application, reproducible local Supabase
-stack, versioned e-commerce schema, email/password authentication, and complete Row Level Security.
-The local development environment remains independent from Supabase Cloud. Catalog and checkout
-business features remain intentionally unimplemented until their corresponding phases.
+Phase 6 provides the deployed React application, reproducible local Supabase stack, versioned
+e-commerce schema, authentication, complete Row Level Security, and a functional product catalog.
+The Home, category navigation, server-side filters, sorting, stock states, and product detail use
+real Supabase data. Cart and checkout remain intentionally unimplemented until their phases.
 
 ## Architecture
 
@@ -170,6 +170,13 @@ RLS is enabled on every current public table. Catalog visibility, row ownership,
 access, coupon secrecy, and read-only order history are enforced in PostgreSQL. Admin routes are
 also guarded in React for UX. See `docs/authentication.md` for login and first-admin setup, and
 `docs/security.md` for the complete access matrix.
+
+## Catalog
+
+Open `/#/products` to search and filter active products by category and price. Filters are reflected
+in the hash route query string and are executed by Supabase/PostgREST. Product cards and detail pages
+show current stock and handle unavailable images. See `docs/catalog.md` for architecture, query
+behavior, manual test cases, and the correct baseline that precedes BUG-005.
 
 ## Safety notice
 

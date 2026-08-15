@@ -1,55 +1,60 @@
 import { Link } from 'react-router-dom'
+import { CatalogError, ProductGridSkeleton } from '../features/catalog/components/CatalogFeedback'
+import { ProductCard } from '../features/catalog/components/ProductCard'
+import { useCategories, useFeaturedProducts } from '../features/catalog/hooks/useCatalogQueries'
 
 const highlights = [
   {
-    eyebrow: 'Catálogo variado',
-    title: 'Tecnología para cada espacio',
-    description: 'Explora productos de computación, audio, hogar y gaming.',
+    eyebrow: 'Variedad',
+    title: 'Opciones para cada espacio',
+    description: 'Tecnología, hogar, audio, gaming y accesorios en un solo catálogo.',
   },
   {
-    eyebrow: 'Compra simulada',
-    title: 'Un flujo completo y seguro',
-    description: 'Practica desde la búsqueda hasta el seguimiento del pedido.',
+    eyebrow: 'Información clara',
+    title: 'Precios y stock visibles',
+    description: 'Consulta la disponibilidad antes de elegir el producto que necesitas.',
   },
   {
-    eyebrow: 'Pensado para QA',
-    title: 'Pon a prueba tu atención',
-    description: 'Registra tus hallazgos con reportes claros y reproducibles.',
+    eyebrow: 'Navegación simple',
+    title: 'Encuentra productos rápido',
+    description: 'Usa búsqueda, categorías y filtros para acortar tu recorrido.',
   },
 ]
 
-const categories = ['Celulares', 'Computación', 'Audio', 'Hogar', 'Gaming', 'Accesorios']
-
 export function HomePage() {
+  const categoriesQuery = useCategories()
+  const featuredQuery = useFeaturedProducts()
+  const categories = categoriesQuery.data ?? []
+  const featuredProducts = featuredQuery.data ?? []
+
   return (
     <>
       <section className="hero page-width">
         <div className="hero__content">
-          <span className="eyebrow">Una tienda. Muchos escenarios.</span>
-          <h1>Compra como usuario. <span>Piensa como tester.</span></h1>
+          <span className="eyebrow">Tecnología para tu día a día</span>
+          <h1>Todo lo que buscas, <span>en un solo lugar.</span></h1>
           <p>
-            Recorre una experiencia de e-commerce realista y entrena tu criterio de calidad de
-            principio a fin.
+            Descubre una selección de productos para trabajar, disfrutar y renovar tus espacios.
           </p>
           <div className="hero__actions">
             <Link className="button button--primary" to="/products">
               Explorar catálogo
             </Link>
             <Link className="button button--secondary" to="/register">
-              Comenzar práctica
+              Crear una cuenta
             </Link>
           </div>
         </div>
         <div aria-label="Vista previa del marketplace" className="hero__visual">
           <div className="visual-card visual-card--featured">
-            <span className="visual-card__tag">Destacado</span>
-            <div className="visual-card__product" aria-hidden="true">⌁</div>
-            <strong>Productos seleccionados</strong>
-            <span>Descubre el catálogo de práctica</span>
+            <span className="visual-card__tag">Selección MercadoBugs</span>
+            <div className="visual-card__product" aria-hidden="true">MB</div>
+            <strong>{featuredProducts[0]?.name ?? 'Productos seleccionados'}</strong>
+            <span>Explora alternativas para cada necesidad</span>
           </div>
           <div className="visual-card visual-card--stat">
-            <strong>30+</strong>
-            <span>productos ficticios</span>
+            <strong>{categoriesQuery.isSuccess ? categories.length : '—'}</strong>
+            <span>categorías disponibles</span>
           </div>
         </div>
       </section>
@@ -62,14 +67,51 @@ export function HomePage() {
           </div>
           <Link className="text-link" to="/products">Ver todo <span aria-hidden="true">→</span></Link>
         </div>
-        <div className="category-list">
-          {categories.map((category, index) => (
-            <Link className="category-chip" key={category} to="/products">
-              <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-              {category}
-            </Link>
-          ))}
+
+        {categoriesQuery.isPending && (
+          <div aria-busy="true" aria-label="Cargando categorías" className="category-list">
+            {Array.from({ length: 7 }, (_, index) => <div className="category-chip category-chip--skeleton" key={index} />)}
+          </div>
+        )}
+        {categoriesQuery.isError && <CatalogError onRetry={() => { void categoriesQuery.refetch() }} />}
+        {categoriesQuery.isSuccess && categories.length === 0 && (
+          <div className="catalog-inline-alert" role="status">No hay categorías disponibles.</div>
+        )}
+        {categories.length > 0 && (
+          <div className="category-list">
+            {categories.map((category, index) => (
+              <Link
+                className="category-chip"
+                key={category.id}
+                to={`/products?category=${encodeURIComponent(category.slug)}`}
+              >
+                <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                {category.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="section page-width">
+        <div className="section-heading">
+          <div>
+            <span className="eyebrow">Destacados</span>
+            <h2>Productos para descubrir</h2>
+          </div>
+          <Link className="text-link" to="/products">Explorar catálogo <span aria-hidden="true">→</span></Link>
         </div>
+
+        {featuredQuery.isPending && <ProductGridSkeleton />}
+        {featuredQuery.isError && <CatalogError onRetry={() => { void featuredQuery.refetch() }} />}
+        {featuredQuery.isSuccess && featuredProducts.length === 0 && (
+          <div className="catalog-inline-alert" role="status">No hay productos destacados disponibles.</div>
+        )}
+        {featuredProducts.length > 0 && (
+          <div className="product-grid product-grid--home">
+            {featuredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+          </div>
+        )}
       </section>
 
       <section className="section page-width">
@@ -83,14 +125,6 @@ export function HomePage() {
           ))}
         </div>
       </section>
-
-      <aside className="training-notice page-width">
-        <span aria-hidden="true" className="training-notice__icon">i</span>
-        <p>
-          <strong>Entorno de entrenamiento:</strong> MercadoBugs no es una tienda real. No ingreses
-          datos personales, direcciones reales ni información de pago.
-        </p>
-      </aside>
     </>
   )
 }
