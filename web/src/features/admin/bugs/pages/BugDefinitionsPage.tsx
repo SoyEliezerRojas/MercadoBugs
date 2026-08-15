@@ -36,8 +36,8 @@ export function BugDefinitionsPage() {
         <span className="eyebrow">Catálogo interno</span>
         <h1>Bugs conocidos</h1>
         <p>
-          Definiciones oficiales del laboratorio. En FASE 10 todos permanecen planificados y el
-          e-commerce conserva su comportamiento correcto.
+          Definiciones oficiales del laboratorio. En FASE 11 los cinco comportamientos están
+          activos y disponibles para las prácticas de testing.
         </p>
       </header>
 

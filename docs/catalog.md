@@ -94,9 +94,9 @@ orden predeterminado no se guardan. “Limpiar todo” elimina los parámetros y
 completo. La búsqueda actualiza la URL con `replace` mientras se escribe; los cambios discretos de
 categoría, precio y orden permanecen en el historial.
 
-## Baseline correcto previo a BUG-005
+## BUG-005 activo y baseline de comparación
 
-BUG-005 no está implementado. El comportamiento de referencia es:
+El comportamiento correcto de referencia es:
 
 ```text
 category = Audio
@@ -105,6 +105,10 @@ max = 200
 
 category = Audio AND price >= 50 AND price <= 200
 ```
+
+En FASE 11, cuando `category`, `min` y `max` existen a la vez, `catalogApi` conserva los tres
+parámetros en la URL pero omite únicamente el `.lte('price', max)`. Audio + 50 + 200 devuelve seis
+productos en vez de cuatro e incluye precios superiores a 200.
 
 La búsqueda, cuando existe, agrega otra condición AND. Nunca se combinan categoría y precio con OR.
 En el seed actual, `search=headset`, `category=gaming`, `min=50` y `max=200` devuelve únicamente
@@ -124,4 +128,3 @@ Con Supabase local y el seed actual:
 8. Limpiar filtros vuelve a 40 resultados y elimina los parámetros.
 9. El seed contiene cuatro productos activos sin stock y sus tarjetas muestran “Sin stock”.
 10. `/products/id-inexistente` muestra un estado controlado y permite volver al catálogo.
-

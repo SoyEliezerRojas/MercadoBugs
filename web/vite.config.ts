@@ -6,6 +6,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: mode === 'production' ? env.VITE_BASE_PATH || '/MercadoBugs/' : '/',
+    build: {
+      sourcemap: false,
+    },
     plugins: [react()],
   }
 })

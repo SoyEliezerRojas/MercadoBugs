@@ -56,7 +56,6 @@ export function CheckoutPage() {
   const cartQuery = useCart(userId)
   const [values, setValues] = useState<FormValues>(initialValues)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [checkoutRequestId] = useState(() => crypto.randomUUID())
   const version = useMemo(() => cartVersion(cartQuery.data), [cartQuery.data])
   const pricingQuery = useCheckoutPricing(
     userId,
@@ -83,6 +82,10 @@ export function CheckoutPage() {
   }
 
   if (!cart || cart.items.length === 0) {
+    if (checkoutMutation.isPending || checkoutMutation.isSuccess) {
+      return <div aria-busy="true" className="checkout-page checkout-page--state page-width">Procesando compra…</div>
+    }
+
     return <Navigate replace to="/cart" />
   }
 
@@ -105,7 +108,7 @@ export function CheckoutPage() {
 
     checkoutMutation.mutate(
       {
-        checkoutRequestId,
+        checkoutRequestId: crypto.randomUUID(),
         shippingName: values.shippingName.trim(),
         shippingAddress: values.shippingAddress.trim(),
         shippingCity: values.shippingCity.trim(),
@@ -271,8 +274,7 @@ export function CheckoutPage() {
           <button
             className="button button--primary checkout-submit"
             disabled={
-              checkoutMutation.isPending
-              || isChangingCoupon
+              isChangingCoupon
               || pricingQuery.isPending
               || pricingQuery.isError
               || hasUnavailableItem

@@ -68,57 +68,59 @@ función valida el estado completo antes de escribir y luego ejecuta:
 3. descuento de `products.stock`;
 4. cambio del carrito a `converted`.
 
-Una excepción en cualquier punto revierte las cuatro operaciones. El baseline local de stock
-insuficiente comprobó el mismo estado antes y después: `orders=0`, `order_items=0`, `stock=2` y
-`cart.status=active`.
+Una excepción en cualquier punto revierte las cuatro operaciones. Esta garantía continúa activa en
+FASE 11; BUG-002 cambia únicamente la decisión de aceptar una cantidad superior y limita el stock
+final a cero. Otros errores siguen dejando pedido e inventario sin cambios parciales.
 
 ## Locks y concurrencia
 
 La función bloquea:
 
-1. el carrito activo del usuario con `FOR UPDATE`;
-2. sus `cart_items`, ordenados por `product_id`;
-3. los productos involucrados con `FOR UPDATE`, también ordenados por UUID;
-4. el cupón asociado durante su validación final.
+1. los `cart_items`, ordenados por `product_id`;
+2. los productos involucrados con `FOR UPDATE`, también ordenados por UUID;
+3. el cupón asociado durante su validación final.
 
-El orden estable reduce el riesgo de deadlocks. Un checkout concurrente espera el lock, vuelve a
-observar el stock confirmado por la otra transacción y falla si ya no quedan unidades. En la prueba
-simultánea con stock 1, una request devolvió 200/`confirmed`, la otra 409/`insufficient_stock`, quedó
-un pedido y el stock terminó en 0.
+El carrito se captura antes de esos locks. BUG-002 permite continuar con stock insuficiente y usa
+`GREATEST(stock - quantity, 0)`. BUG-003 registra la primera conversión en
+`private.checkout_transitions`: una segunda confirmación puede reclamarla una sola vez dentro de dos
+segundos. Una tercera request o una iniciada después de consumir la ventana falla.
 
 ## Idempotencia
 
-React genera un `checkoutRequestId` UUID una vez por intento. PostgreSQL lo guarda en la constraint
-UNIQUE de `orders`. Repetir una request ya confirmada para el mismo usuario devuelve el mismo pedido
-con `idempotentReplay=true`; otro usuario no puede reutilizar ese UUID.
+React genera un `checkoutRequestId` UUID en cada submit. PostgreSQL conserva la constraint UNIQUE de
+`orders`: repetir exactamente el mismo UUID devuelve el pedido original con
+`idempotentReplay=true`, y otro usuario no puede reutilizarlo.
 
-El lock del carrito ofrece una segunda defensa: dos identificadores diferentes tampoco pueden
-convertir simultáneamente el mismo carrito activo. La UI además deshabilita `Confirmar compra` y
-muestra `Procesando…` mientras la mutation está pendiente.
+Para BUG-003 el botón no se deshabilita por la primera mutation. Dos submits rápidos usan UUID
+distintos y pueden crear dos pedidos dentro de la ventana acotada; un submit normal crea uno y
+recargar el detalle no ejecuta checkout.
 
 ## Cupones y cálculos
 
 React nunca descarga `coupons`. El código escrito se normaliza a mayúsculas y el servidor valida:
 
 - existencia y `active`;
-- `starts_at` y `expires_at` usando el reloj de PostgreSQL;
+- `starts_at` usando el reloj de PostgreSQL;
 - `minimum_purchase` contra el subtotal actual del carrito;
 - tipo `percentage` o `fixed`.
 
 Un cupón válido se guarda en `carts.coupon_id`; refresh y una sesión posterior conservan la
-selección. Una cotización retira automáticamente un cupón que dejó de ser válido. Checkout siempre
-repite la validación bajo lock y rechaza la compra si el cupón expiró entre preview y confirmación.
+selección. BUG-001 hace que `expires_at` no invalide el cupón ni en preview ni en confirmación. Las
+validaciones de existencia, activo, inicio, mínimo, tipo y valor permanecen operativas.
 
 Los importes definitivos usan `numeric(12,2)`:
 
 ```text
 subtotal = SUM(products.price * cart_items.quantity)
-discount percentage = ROUND(subtotal * value / 100, 2)
+percentage basis = first line total when there are 2+ distinct lines; otherwise subtotal
+discount percentage = ROUND(percentage basis * value / 100, 2)
 discount fixed = LEAST(value, subtotal)
 total = subtotal - discount + shipping_cost
 ```
 
-El descuento efectivo nunca supera el subtotal. Por eso un cupón fijo de 200 sobre US$ 18.90
+BUG-004 ordena la primera línea por `cart_items.created_at ASC, id ASC`. Preview y checkout usan la
+misma base, y el pedido guarda el importe resultante. El descuento efectivo nunca supera el
+subtotal. Por eso un cupón fijo de 200 sobre US$ 18.90
 produce descuento US$ 18.90 y total US$ 5.00 con envío estándar, nunca un total negativo.
 
 `order_items` conserva `product_id`, `product_name`, `unit_price`, `quantity` y `line_total` leídos

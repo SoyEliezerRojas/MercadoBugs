@@ -73,7 +73,7 @@ the caller's active cart and the products/coupon referenced by that cart.
 `bug_definitions` is an answer key rather than public commerce data. `authenticated` receives only
 `SELECT`, and the sole policy requires `private.is_admin()`. A tester's direct Data API request
 therefore returns zero rows; `anon` lacks even the table privilege. No browser role can insert,
-update, or delete definitions in FASE 10, including admin. `AdminRoute` and lazy-loaded pages reduce
+update, or delete definitions in FASE 11, including admin. `AdminRoute` and lazy-loaded pages reduce
 accidental exposure in the UX but are not authorization controls.
 
 ## Operational rules

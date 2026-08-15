@@ -75,9 +75,13 @@ export function BugDefinitionDetailPage() {
         <section className="bug-definition-section--actual">
           <span className="bug-definition-section__number">04</span>
           <div>
-            <h2>Resultado actual planificado</h2>
+            <h2>{bug.status === 'enabled' ? 'Resultado actual' : 'Resultado actual planificado'}</h2>
             <p>{bug.actualResult}</p>
-            <small>Este comportamiento todavía no está habilitado.</small>
+            <small>
+              {bug.status === 'enabled'
+                ? 'Este comportamiento está activo en el laboratorio.'
+                : 'Este comportamiento todavía no está habilitado.'}
+            </small>
           </div>
         </section>
       </div>

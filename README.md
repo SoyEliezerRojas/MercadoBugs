@@ -4,10 +4,10 @@ MercadoBugs is a fictitious e-commerce application for software testing practice
 
 ## Current status
 
-Phase 10 provides the deployed React application, reproducible local Supabase stack, versioned
+Phase 11 provides the deployed React application, reproducible local Supabase stack, versioned
 e-commerce schema, authentication, complete Row Level Security, product catalog, persistent cart,
-server-validated coupons, an atomic/idempotent simulated checkout, a read-only order history, and a
-protected administrative catalog of five planned bugs.
+server-validated coupons, an atomic simulated checkout, a read-only order history, and a protected
+administrative catalog of five enabled, deterministic functional bugs.
 
 ## Architecture
 
@@ -175,8 +175,8 @@ also guarded in React for UX. See `docs/authentication.md` for login and first-a
 
 Open `/#/products` to search and filter active products by category and price. Filters are reflected
 in the hash route query string and are executed by Supabase/PostgREST. Product cards and detail pages
-show current stock and handle unavailable images. See `docs/catalog.md` for architecture, query
-behavior, manual test cases, and the correct baseline that precedes BUG-005.
+show current stock and handle unavailable images. BUG-005 intentionally ignores the maximum only
+when category, minimum, and maximum coexist. See `docs/catalog.md` for the exact boundary.
 
 ## Cart
 
@@ -190,8 +190,8 @@ RLS boundaries, and the boundary with checkout's final stock validation.
 Authenticated users can apply a persisted coupon in `/#/cart`, complete a simulated checkout at
 `/#/checkout`, and refresh the resulting order detail. Prices, coupon dates, stock, shipping,
 totals, order snapshots, and cart conversion are recalculated atomically by PostgreSQL through
-authenticated Edge Functions. See `docs/checkout.md` for locks, rollback, idempotency, security,
-tests, and deploy commands.
+authenticated Edge Functions. Phase 11 adds four narrowly scoped checkout/coupon deviations while
+retaining authentication, RLS, constraints, and rollback. See `docs/checkout.md` and `docs/bugs.md`.
 
 ## Orders
 
@@ -205,10 +205,10 @@ TanStack Query keys, navigation, snapshot behavior, security, and the Phase 9 te
 
 Administrators can open `/#/admin/bugs` and `/#/admin/bugs/:code` to review five versioned bug
 definitions. `AdminRoute` protects the UX while PostgreSQL RLS is the actual authorization boundary;
-testers and anonymous users cannot retrieve the answer key. Every bug remains `planned`, so the five
-documented e-commerce baselines are still correct. See `docs/bugs.md` for the catalog and the public
-repository disclosure risk.
+testers and anonymous users cannot retrieve the answer key. The five definitions are now `enabled`.
+See `docs/bugs.md` for triggers, regression boundaries, and the public repository disclosure risk.
 
 ## Safety notice
 
-MercadoBugs deliberately contains known defects only after Phase 11. Until then, unexpected behavior should be treated as an accidental implementation defect.
+MercadoBugs deliberately contains exactly five known functional defects. Any behavior outside their
+documented trigger conditions should be treated as an accidental implementation defect.

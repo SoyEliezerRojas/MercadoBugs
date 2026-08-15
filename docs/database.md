@@ -1,9 +1,9 @@
 # Database model
 
 Phase 3 defines the correct base e-commerce model. Phase 4 adds authentication automation, Phase 5
-adds RLS to every current public table, Phase 8 adds transactional checkout, and Phase 10 adds the
-administrative known-bug catalog. The schema still contains no reports and no deliberate behavior
-defects are active.
+adds RLS to every current public table, Phase 8 adds transactional checkout, Phase 10 adds the
+administrative known-bug catalog, and Phase 11 enables its five controlled behaviors. The schema
+still contains no reports.
 
 ## Relationships
 
@@ -44,8 +44,8 @@ Products belong to one category. Categories referenced by products and products 
 active cart cannot be deleted accidentally (`ON DELETE RESTRICT`). Slugs are unique. Prices use
 `numeric(12,2)`, never floating point, and both price and stock must be non-negative.
 
-The `stock >= 0` constraint intentionally models the correct system. The future over-stock defect
-must be introduced explicitly in its own phase without weakening today's general integrity.
+The `stock >= 0` constraint remains active. BUG-002 permits the sale but clamps the resulting stock
+to zero, so the functional defect does not weaken this integrity rule.
 
 ### `coupons`
 
@@ -53,8 +53,8 @@ Codes are uppercase and unique. The type is either `percentage` or `fixed`; valu
 percentage values cannot exceed 100, minimum purchase cannot be negative, and an expiry must occur
 after its start when both exist. Expiration itself is evaluated by checkout logic later.
 
-`OLD20` remains enabled but has an `expires_at` value in 2024. This is a normal expired coupon: a
-correct validator checks both `active` and the validity interval.
+`OLD20` remains enabled and has an `expires_at` value in 2024. BUG-001 intentionally omits only the
+expiration rejection; `active`, `starts_at`, minimum, type, and value remain validated.
 
 ### `carts` and `cart_items`
 
@@ -91,8 +91,8 @@ order remains available for administrative history.
 Stores five versioned laboratory definitions with human code, full reproduction information,
 severity, category, and lifecycle status. Codes are unique and match `BUG-NNN`; severity is limited
 to `low|medium|high|critical`, category to the five Phase 10 domains, and status to
-`planned|enabled|disabled`. All text fields must be nonblank. The records live in the migration,
-not the commercial seed, and all begin as `planned`.
+`planned|enabled|disabled`. All text fields must be nonblank. The records live in migrations rather
+than the commercial seed: FASE 10 inserts them as `planned` and FASE 11 enables each one in order.
 
 RLS exposes rows only to authenticated administrators through `private.is_admin()`. The browser has
 no mutation grants. See `bugs.md` for definitions and baselines.
@@ -118,8 +118,9 @@ duplicate indexes are intentionally omitted.
 
 `private.checkout_shipping_cost(text)` is the authoritative shipping rule. The authenticated-only
 `public.manage_cart_coupon(...)` RPC prices the caller's active cart and persists or removes its
-coupon. `public.perform_checkout(...)` locks the caller's cart, items, products, and coupon, then
-creates snapshots, decrements stock, and converts the cart in one transaction.
+coupon. `public.perform_checkout(...)` snapshots the active cart, locks items/products/coupon, then
+creates order snapshots, adjusts stock, and converts the cart in one transaction. FASE 11 adds the
+private `checkout_transitions` coordination table for the bounded BUG-003 duplicate window.
 
 Both public RPCs are narrowly scoped `SECURITY DEFINER` functions with an empty `search_path` and
 ownership derived from `auth.uid()`. See `checkout.md` for their lock order, rollback behavior, and

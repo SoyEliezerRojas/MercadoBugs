@@ -111,7 +111,10 @@ export async function getProducts(filters: ProductFilters): Promise<Product[]> {
     query = query.gte('price', filters.minPrice)
   }
 
-  if (filters.maxPrice !== null) {
+  if (
+    filters.maxPrice !== null
+    && !(filters.category && filters.minPrice !== null)
+  ) {
     query = query.lte('price', filters.maxPrice)
   }
 
