@@ -1,0 +1,72 @@
+# Row Level Security
+
+Phase 5 makes PostgreSQL the authorization boundary for every table exposed through the Supabase
+Data API. React route guards still improve navigation, but they do not grant data access.
+
+## Access matrix
+
+`Own` means that the row is linked to `auth.uid()`. `Active` means `active = true`.
+
+| Resource | Anonymous | Tester | Admin |
+| --- | --- | --- | --- |
+| `profiles` | None | Read own profile; update own `username` | Read all profiles; update any `username` |
+| `categories` | Read active rows | Read active rows | Read and manage all rows |
+| `products` | Read active rows | Read active rows | Read and manage all rows |
+| `carts` | None | Create, read, update, and delete own carts | Read all carts |
+| `cart_items` | None | Create, read, update, and delete items in own carts | Read all cart items |
+| `coupons` | None | None | Read and manage all coupons |
+| `orders` | None | Read own orders | Read all orders |
+| `order_items` | None | Read items belonging to own orders | Read all order items |
+
+The grants and policies intentionally work together. Grants limit which operations and columns a
+browser role may request; RLS then limits which rows qualify.
+
+At the PostgreSQL layer, `authenticated` is the shared role used by both testers and admins. RLS
+consults the server-side `profiles.role` only when an operation has an administrative policy; it
+does not trust user metadata, local storage, or request payloads.
+
+## Role protection
+
+Browser sessions receive no `UPDATE` privilege on `profiles.role`. This also applies to an admin
+browser session because testers and admins both connect to PostgreSQL as `authenticated`. Role
+promotion must remain a trusted operation performed in Studio, SQL, or a future server-side admin
+workflow. Client code can only update the `username` column, and RLS limits testers to their own
+row.
+
+The reusable `private.is_admin()` helper reads the caller's profile. It is `STABLE` and
+`SECURITY DEFINER`, uses an empty `search_path`, and lives outside the API-exposed `public` schema.
+Only the `authenticated` database role can execute it for policy evaluation; it is not a callable
+public RPC.
+
+## Catalog and coupons
+
+Anonymous and authenticated visitors can only select active categories and products. Administrators
+can also see inactive entries and manage the catalog.
+
+Coupon rows are completely hidden from anonymous and tester sessions. This prevents clients from
+enumerating codes such as the expired `OLD20` seed. Coupon validation and attaching a coupon to a
+cart belong in trusted checkout logic, so browser sessions cannot insert or update `carts.coupon_id`.
+
+## Ownership boundaries
+
+Cart-item policies resolve ownership through the parent cart. A caller cannot create an item in,
+move an item to, update an item in, or delete an item from another user's cart. Cart updates also
+check the resulting owner, which prevents transferring a cart to another user.
+
+Order rows and their snapshots are read-only through browser sessions. Testers can read only their
+own history; administrators can read all history. Order creation will be implemented as trusted,
+server-side checkout logic in a later phase.
+
+## Operational rules
+
+- Never expose a `service_role` or secret key in `web/` or in any `VITE_` variable. That role can
+  bypass RLS.
+- Add RLS and an explicit access decision to every future table before exposing it through the Data
+  API.
+- Keep ownership columns indexed. The current cart, order, and foreign-key indexes support the
+  policy predicates used in this phase.
+- The application has no bug-report tables yet; they will receive their own policies when their
+  schema is introduced.
+
+The policies are defined by the Phase 5 migration in `supabase/migrations/` and are recreated by
+`npm run supabase:reset`.
