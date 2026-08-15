@@ -17,6 +17,7 @@ Data API. React route guards still improve navigation, but they do not grant dat
 | `coupons` | None | None | Read and manage all coupons |
 | `orders` | None | Read own orders | Read all orders |
 | `order_items` | None | Read items belonging to own orders | Read all order items |
+| `bug_definitions` | None | None | Read all known-bug definitions |
 
 The grants and policies intentionally work together. Grants limit which operations and columns a
 browser role may request; RLS then limits which rows qualify.
@@ -67,6 +68,14 @@ Both checkout RPCs are `SECURITY DEFINER`, use `search_path = ''`, qualify every
 missing `auth.uid()`, and accept no arbitrary owner UUID. Their elevated write access is limited to
 the caller's active cart and the products/coupon referenced by that cart.
 
+## Known-bug answers
+
+`bug_definitions` is an answer key rather than public commerce data. `authenticated` receives only
+`SELECT`, and the sole policy requires `private.is_admin()`. A tester's direct Data API request
+therefore returns zero rows; `anon` lacks even the table privilege. No browser role can insert,
+update, or delete definitions in FASE 10, including admin. `AdminRoute` and lazy-loaded pages reduce
+accidental exposure in the UX but are not authorization controls.
+
 ## Operational rules
 
 - Never expose a `service_role` or secret key in `web/` or in any `VITE_` variable. That role can
@@ -78,5 +87,5 @@ the caller's active cart and the products/coupon referenced by that cart.
 - The application has no bug-report tables yet; they will receive their own policies when their
   schema is introduced.
 
-The policies are defined by the Phase 5 migration in `supabase/migrations/` and are recreated by
-`npm run supabase:reset`.
+The general policies are defined by the Phase 5 migration; the Phase 10 migration owns the
+`bug_definitions` policy. Both are recreated by `npm run supabase:reset`.

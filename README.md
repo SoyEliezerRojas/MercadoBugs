@@ -4,9 +4,10 @@ MercadoBugs is a fictitious e-commerce application for software testing practice
 
 ## Current status
 
-Phase 9 provides the deployed React application, reproducible local Supabase stack, versioned
+Phase 10 provides the deployed React application, reproducible local Supabase stack, versioned
 e-commerce schema, authentication, complete Row Level Security, product catalog, persistent cart,
-server-validated coupons, an atomic/idempotent simulated checkout, and a read-only order history.
+server-validated coupons, an atomic/idempotent simulated checkout, a read-only order history, and a
+protected administrative catalog of five planned bugs.
 
 ## Architecture
 
@@ -187,7 +188,7 @@ RLS boundaries, and the boundary with checkout's final stock validation.
 ## Checkout
 
 Authenticated users can apply a persisted coupon in `/#/cart`, complete a simulated checkout at
-`/#/checkout`, and refresh the minimal confirmation route. Prices, coupon dates, stock, shipping,
+`/#/checkout`, and refresh the resulting order detail. Prices, coupon dates, stock, shipping,
 totals, order snapshots, and cart conversion are recalculated atomically by PostgreSQL through
 authenticated Edge Functions. See `docs/checkout.md` for locks, rollback, idempotency, security,
 tests, and deploy commands.
@@ -199,6 +200,14 @@ detail at `/#/orders/:id`. Product names, unit prices, line totals, coupon, deli
 amounts come from checkout-time snapshots rather than current catalog or coupon data. PostgreSQL RLS
 enforces ownership, and testers have no order mutation privileges. See `docs/orders.md` for queries,
 TanStack Query keys, navigation, snapshot behavior, security, and the Phase 9 test baseline.
+
+## Known bugs administration
+
+Administrators can open `/#/admin/bugs` and `/#/admin/bugs/:code` to review five versioned bug
+definitions. `AdminRoute` protects the UX while PostgreSQL RLS is the actual authorization boundary;
+testers and anonymous users cannot retrieve the answer key. Every bug remains `planned`, so the five
+documented e-commerce baselines are still correct. See `docs/bugs.md` for the catalog and the public
+repository disclosure risk.
 
 ## Safety notice
 

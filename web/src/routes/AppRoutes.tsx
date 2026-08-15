@@ -1,5 +1,7 @@
+import { lazy, Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
+import { AdminLayout } from '../features/admin/AdminLayout'
 import { LoginPage } from '../features/auth/LoginPage'
 import { RegisterPage } from '../features/auth/RegisterPage'
 import { CartPage } from '../features/cart/pages/CartPage'
@@ -23,11 +25,23 @@ const authenticatedRoutes = [
 ] as const
 
 const adminRoutes = [
-  { path: 'admin', title: 'Panel de administración', phase: 13, description: 'Resumen privado para administradores.' },
   { path: 'admin/users', title: 'Usuarios', phase: 13, description: 'Consulta administrativa de testers.' },
   { path: 'admin/reports', title: 'Revisión de reportes', phase: 13, description: 'Clasificación manual de hallazgos.' },
-  { path: 'admin/bugs', title: 'Bugs conocidos', phase: 10, description: 'Registro interno protegido de defectos intencionales.' },
 ] as const
+
+const AdminHomePage = lazy(() => import('../features/admin/pages/AdminHomePage').then((module) => ({
+  default: module.AdminHomePage,
+})))
+const BugDefinitionsPage = lazy(() => import('../features/admin/bugs/pages/BugDefinitionsPage').then((module) => ({
+  default: module.BugDefinitionsPage,
+})))
+const BugDefinitionDetailPage = lazy(() => import('../features/admin/bugs/pages/BugDefinitionDetailPage').then((module) => ({
+  default: module.BugDefinitionDetailPage,
+})))
+
+function AdminPageLoading() {
+  return <div aria-busy="true" className="admin-lazy-loading page-width">Cargando administración…</div>
+}
 
 export function AppRoutes() {
   return (
@@ -66,19 +80,24 @@ export function AppRoutes() {
         </Route>
 
         <Route element={<AdminRoute />}>
-          {adminRoutes.map((route) => (
-            <Route
-              element={
-                <PhasePlaceholderPage
-                  description={route.description}
-                  phase={route.phase}
-                  title={route.title}
-                />
-              }
-              key={route.path}
-              path={route.path}
-            />
-          ))}
+          <Route element={<AdminLayout />}>
+            <Route path="admin" element={<Suspense fallback={<AdminPageLoading />}><AdminHomePage /></Suspense>} />
+            <Route path="admin/bugs" element={<Suspense fallback={<AdminPageLoading />}><BugDefinitionsPage /></Suspense>} />
+            <Route path="admin/bugs/:code" element={<Suspense fallback={<AdminPageLoading />}><BugDefinitionDetailPage /></Suspense>} />
+            {adminRoutes.map((route) => (
+              <Route
+                element={
+                  <PhasePlaceholderPage
+                    description={route.description}
+                    phase={route.phase}
+                    title={route.title}
+                  />
+                }
+                key={route.path}
+                path={route.path}
+              />
+            ))}
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

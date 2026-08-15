@@ -1,8 +1,9 @@
 # Database model
 
 Phase 3 defines the correct base e-commerce model. Phase 4 adds authentication automation, Phase 5
-adds RLS to every current public table, and Phase 8 adds transactional checkout. The schema still
-contains no bug definitions, reports, or deliberate defects.
+adds RLS to every current public table, Phase 8 adds transactional checkout, and Phase 10 adds the
+administrative known-bug catalog. The schema still contains no reports and no deliberate behavior
+defects are active.
 
 ## Relationships
 
@@ -16,6 +17,8 @@ profiles
     |      +-------- coupons
     |
     +-- orders ----- order_items ----- products (nullable reference)
+
+bug_definitions (administrative, no commerce relationship)
 ```
 
 ## Identifier strategy
@@ -83,11 +86,22 @@ uses `ON DELETE SET NULL`, so deleting a catalog product cannot destroy or alter
 details. Deleting an Auth user similarly nulls `orders.user_id` through profile deletion while the
 order remains available for administrative history.
 
+### `bug_definitions`
+
+Stores five versioned laboratory definitions with human code, full reproduction information,
+severity, category, and lifecycle status. Codes are unique and match `BUG-NNN`; severity is limited
+to `low|medium|high|critical`, category to the five Phase 10 domains, and status to
+`planned|enabled|disabled`. All text fields must be nonblank. The records live in the migration,
+not the commercial seed, and all begin as `planned`.
+
+RLS exposes rows only to authenticated administrators through `private.is_admin()`. The browser has
+no mutation grants. See `bugs.md` for definitions and baselines.
+
 ## Timestamps
 
 One `public.set_updated_at()` trigger function updates `updated_at` on `profiles`, `categories`,
-`products`, `coupons`, `carts`, `cart_items`, and `orders`. Immutable order-item snapshots only have
-`created_at`.
+`products`, `coupons`, `carts`, `cart_items`, `orders`, and `bug_definitions`. Immutable order-item
+snapshots only have `created_at`.
 
 ## Indexes
 
@@ -114,4 +128,5 @@ idempotency design.
 ## Seed data
 
 `supabase/seed.sql` contains seven categories, forty fictional products, and four coupons. It does
-not create Auth users, profiles, carts, orders, reports, admins, or known bugs.
+not create Auth users, profiles, carts, orders, reports, or admins. Known bugs are structural
+laboratory data and are inserted exactly once by their versioned Phase 10 migration.

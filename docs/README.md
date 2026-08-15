@@ -11,6 +11,6 @@ Documentation will be expanded alongside the implementation:
 - `cart.md` documents persistent cart behavior, stock validation, concurrency, and RLS boundaries.
 - `checkout.md` documents coupons, atomic checkout, stock locks, idempotency, and Phase 8 baselines.
 - `orders.md` documents order history, detail snapshots, ownership, and Phase 9 baselines.
-- `bugs.md` when the five intentional defects are introduced.
+- `bugs.md` documents the protected known-bug catalog and the correct Phase 10 baselines.
 
 Keeping these documents phase-aligned prevents them from describing behavior that does not yet exist.

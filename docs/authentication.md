@@ -50,7 +50,7 @@ database rather than silently inventing a client-side role.
 
 - Public: `/`, `/products`, `/products/:id`, `/login`, `/register`, `/forbidden`.
 - Authenticated: `/cart`, `/checkout`, `/orders`, `/orders/:id`, `/report-bug`, `/my-reports`.
-- Admin UX: `/admin`, `/admin/users`, `/admin/reports`, `/admin/bugs`.
+- Admin UX: `/admin`, `/admin/users`, `/admin/reports`, `/admin/bugs`, `/admin/bugs/:code`.
 
 `ProtectedRoute` preserves the attempted location and returns there after login. `AdminRoute`
 redirects authenticated non-admin users to `/forbidden`.
