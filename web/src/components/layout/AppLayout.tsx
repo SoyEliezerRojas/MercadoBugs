@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../features/auth/useAuth'
+import { CartButton } from '../../features/cart/components/CartButton'
 
 const navigation = [
   { to: '/', label: 'Inicio' },
@@ -9,7 +10,7 @@ const navigation = [
 
 export function AppLayout() {
   const navigate = useNavigate()
-  const { isAuthenticated, isLoading, profile, profileError, role, signOut } = useAuth()
+  const { isAuthenticated, isLoading, profile, profileError, role, signOut, user } = useAuth()
   const [logoutError, setLogoutError] = useState<string | null>(null)
   const [isSigningOut, setIsSigningOut] = useState(false)
 
@@ -63,8 +64,9 @@ export function AppLayout() {
               <span aria-label="Cargando sesión" className="auth-skeleton" />
             ) : isAuthenticated ? (
               <>
+                {user && <CartButton userId={user.id} />}
                 {role === 'admin' && (
-                  <NavLink className="button button--ghost button--compact" to="/admin">
+                  <NavLink className="button button--ghost button--compact header-admin-link" to="/admin">
                     Admin
                   </NavLink>
                 )}

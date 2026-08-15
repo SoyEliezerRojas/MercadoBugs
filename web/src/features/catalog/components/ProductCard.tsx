@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { AddToCartButton } from '../../cart/components/AddToCartButton'
 import type { Product } from '../types'
 import { formatCurrency } from '../utils/formatCurrency'
 import { ProductImage } from './ProductImage'
@@ -29,6 +30,7 @@ export function ProductCard({ product }: ProductCardProps) {
             Ver detalle <span aria-hidden="true">→</span>
           </Link>
         </div>
+        <AddToCartButton compact productId={product.id} stock={product.stock} />
       </div>
     </article>
   )

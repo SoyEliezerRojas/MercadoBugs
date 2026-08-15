@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { LoginPage } from '../features/auth/LoginPage'
 import { RegisterPage } from '../features/auth/RegisterPage'
+import { CartPage } from '../features/cart/pages/CartPage'
 import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage'
 import { ProductsPage } from '../features/catalog/pages/ProductsPage'
 import { AdminRoute } from './AdminRoute'
@@ -13,7 +14,6 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
 
 const authenticatedRoutes = [
-  { path: 'cart', title: 'Tu carrito', phase: 7, description: 'Productos, cantidades y totales persistentes.' },
   { path: 'checkout', title: 'Finalizar compra', phase: 8, description: 'Checkout completamente simulado.' },
   { path: 'orders', title: 'Mis pedidos', phase: 9, description: 'Historial de pedidos del usuario.' },
   { path: 'orders/:id', title: 'Detalle del pedido', phase: 9, description: 'Productos y estado de un pedido.' },
@@ -44,6 +44,7 @@ export function AppRoutes() {
         <Route path="products/:id" element={<ProductDetailPage />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="cart" element={<CartPage />} />
           {authenticatedRoutes.map((route) => (
             <Route
               element={

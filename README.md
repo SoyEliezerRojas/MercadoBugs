@@ -4,10 +4,9 @@ MercadoBugs is a fictitious e-commerce application for software testing practice
 
 ## Current status
 
-Phase 6 provides the deployed React application, reproducible local Supabase stack, versioned
-e-commerce schema, authentication, complete Row Level Security, and a functional product catalog.
-The Home, category navigation, server-side filters, sorting, stock states, and product detail use
-real Supabase data. Cart and checkout remain intentionally unimplemented until their phases.
+Phase 7 provides the deployed React application, reproducible local Supabase stack, versioned
+e-commerce schema, authentication, complete Row Level Security, a functional product catalog, and a
+persistent per-user cart. Checkout remains intentionally unimplemented until its phase.
 
 ## Architecture
 
@@ -177,6 +176,13 @@ Open `/#/products` to search and filter active products by category and price. F
 in the hash route query string and are executed by Supabase/PostgREST. Product cards and detail pages
 show current stock and handle unavailable images. See `docs/catalog.md` for architecture, query
 behavior, manual test cases, and the correct baseline that precedes BUG-005.
+
+## Cart
+
+Authenticated users can add products, change quantities within current stock, remove lines, and
+empty their persistent cart at `/#/cart`. The navbar count, line subtotals, and general subtotal share
+the same user-scoped TanStack Query data. See `docs/cart.md` for lazy creation, concurrency behavior,
+RLS boundaries, and the checkout stock responsibility reserved for Phase 8.
 
 ## Safety notice
 

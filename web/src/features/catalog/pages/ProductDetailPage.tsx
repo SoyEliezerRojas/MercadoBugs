@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
+import { AddToCartButton } from '../../cart/components/AddToCartButton'
 import { CatalogError } from '../components/CatalogFeedback'
 import { ProductImage } from '../components/ProductImage'
 import { useProduct } from '../hooks/useCatalogQueries'
@@ -75,6 +76,7 @@ export function ProductDetailPage() {
           <span className={`stock-label stock-label--detail ${hasStock ? 'stock-label--available' : 'stock-label--empty'}`}>
             {hasStock ? `${product.stock} unidades disponibles` : 'Producto sin stock'}
           </span>
+          <AddToCartButton productId={product.id} stock={product.stock} />
           <div className="product-detail__description">
             <h2>Descripción</h2>
             <p>{product.description || 'Este producto no tiene una descripción disponible.'}</p>
