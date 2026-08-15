@@ -4,9 +4,9 @@ MercadoBugs is a fictitious e-commerce application for software testing practice
 
 ## Current status
 
-Phase 8 provides the deployed React application, reproducible local Supabase stack, versioned
+Phase 9 provides the deployed React application, reproducible local Supabase stack, versioned
 e-commerce schema, authentication, complete Row Level Security, product catalog, persistent cart,
-server-validated coupons, and an atomic/idempotent simulated checkout.
+server-validated coupons, an atomic/idempotent simulated checkout, and a read-only order history.
 
 ## Architecture
 
@@ -191,6 +191,14 @@ Authenticated users can apply a persisted coupon in `/#/cart`, complete a simula
 totals, order snapshots, and cart conversion are recalculated atomically by PostgreSQL through
 authenticated Edge Functions. See `docs/checkout.md` for locks, rollback, idempotency, security,
 tests, and deploy commands.
+
+## Orders
+
+Authenticated users can review their newest orders at `/#/orders` and open a complete historical
+detail at `/#/orders/:id`. Product names, unit prices, line totals, coupon, delivery, and financial
+amounts come from checkout-time snapshots rather than current catalog or coupon data. PostgreSQL RLS
+enforces ownership, and testers have no order mutation privileges. See `docs/orders.md` for queries,
+TanStack Query keys, navigation, snapshot behavior, security, and the Phase 9 test baseline.
 
 ## Safety notice
 

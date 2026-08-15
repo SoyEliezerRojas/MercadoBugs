@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { cartKeys } from '../../cart/hooks/useCart'
 import { catalogKeys } from '../../catalog/hooks/useCatalogQueries'
+import { ordersKeys } from '../../orders/hooks/useOrders'
 import { applyCoupon, getCartPricing, removeCoupon } from '../api/couponApi'
-import { getOrderConfirmation, performCheckout } from '../api/checkoutApi'
+import { performCheckout } from '../api/checkoutApi'
 import type { CheckoutPayload, ShippingMethod } from '../types'
 
 export const checkoutKeys = {
@@ -10,7 +11,6 @@ export const checkoutKeys = {
   pricingRoot: (userId: string) => [...checkoutKeys.all, 'pricing', userId] as const,
   pricing: (userId: string, shippingMethod: ShippingMethod | null, cartVersion: string) =>
     [...checkoutKeys.pricingRoot(userId), shippingMethod ?? 'cart', cartVersion] as const,
-  confirmation: (orderId: string) => [...checkoutKeys.all, 'confirmation', orderId] as const,
 }
 
 export function useCheckoutPricing(
@@ -61,14 +61,7 @@ export function usePerformCheckout(userId: string) {
       void queryClient.invalidateQueries({ queryKey: cartKeys.active(userId) })
       void queryClient.invalidateQueries({ queryKey: catalogKeys.all })
       void queryClient.invalidateQueries({ queryKey: checkoutKeys.pricingRoot(userId) })
+      void queryClient.invalidateQueries({ queryKey: ordersKeys.all })
     },
-  })
-}
-
-export function useOrderConfirmation(orderId: string) {
-  return useQuery({
-    queryKey: checkoutKeys.confirmation(orderId),
-    queryFn: () => getOrderConfirmation(orderId),
-    enabled: Boolean(orderId),
   })
 }

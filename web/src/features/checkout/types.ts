@@ -50,16 +50,6 @@ export interface CheckoutPayload {
   paymentMethod: PaymentMethod
 }
 
-export interface OrderConfirmation {
-  id: string
-  status: string
-  total: number
-  couponCode: string | null
-  shippingMethod: string
-  paymentMethod: string
-  createdAt: string
-}
-
 export class CheckoutOperationError extends Error {
   code: string
   details: Record<string, unknown> | null

@@ -115,7 +115,10 @@ export function CheckoutPage() {
       },
       {
         onSuccess: (order) => {
-          void navigate(`/checkout/success/${order.id}`, { replace: true })
+          void navigate(`/orders/${order.id}`, {
+            replace: true,
+            state: { checkoutCompleted: true },
+          })
         },
       },
     )

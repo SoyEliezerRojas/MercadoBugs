@@ -126,15 +126,15 @@ del servidor. `orders.coupon_code` conserva el código como snapshot histórico.
 
 ## React y TanStack Query
 
-`web/src/features/checkout/` separa tipos, repositorios, hooks, cupón, formulario, resumen y página
-de éxito. TanStack Query usa mutations para aplicar/quitar cupón y confirmar compra. Al finalizar
-solo invalida las claves de carrito, catálogo y pricing afectadas.
+`web/src/features/checkout/` separa tipos, repositorios, hooks, cupón, formulario y resumen. TanStack
+Query usa mutations para aplicar/quitar cupón y confirmar compra. Desde la Fase 9, al finalizar
+invalida carrito, catálogo, pricing e historial de pedidos.
 
 La UI calcula únicamente representaciones visuales. El preview procede de `validate-coupon`; la
 respuesta de checkout reemplaza cualquier valor anterior como autoridad. La ruta `/checkout` está
-protegida y un carrito vacío vuelve a `/cart`. `/checkout/success/:orderId` consulta solamente los
-campos mínimos del pedido propio mediante la RLS existente; la Fase 9 sigue reservada para historial
-y detalle completo.
+protegida y un carrito vacío vuelve a `/cart`. El checkout navega a `/orders/:id`, cuyo detalle usa
+la RLS y los snapshots históricos. `/checkout/success/:orderId` se conserva únicamente como una
+redirección compatible a esa pantalla.
 
 ## Desarrollo local
 
@@ -203,5 +203,5 @@ npx supabase functions deploy checkout --project-ref eaouxnecjovvypayixff
 git push origin main
 ```
 
-Finalmente se repiten en GitHub Pages los casos de cupón válido/expirado, checkout, refresh de la
-confirmación y ausencia de 404 de assets.
+Finalmente se repiten en GitHub Pages los casos de cupón válido/expirado, checkout, refresh del
+detalle del pedido y ausencia de 404 de assets.

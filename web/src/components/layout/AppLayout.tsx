@@ -57,6 +57,16 @@ export function AppLayout() {
                 {item.label}
               </NavLink>
             ))}
+            {isAuthenticated && (
+              <NavLink
+                className={({ isActive }) =>
+                  isActive ? 'main-nav__link main-nav__link--active' : 'main-nav__link'
+                }
+                to="/orders"
+              >
+                Mis pedidos
+              </NavLink>
+            )}
           </nav>
 
           <div className="header-actions">

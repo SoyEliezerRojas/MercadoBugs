@@ -1,5 +1,5 @@
 import { supabase } from '../../../lib/supabase'
-import type { CheckoutOrder, CheckoutPayload, OrderConfirmation, PaymentMethod, ShippingMethod } from '../types'
+import type { CheckoutOrder, CheckoutPayload, PaymentMethod, ShippingMethod } from '../types'
 import { CheckoutOperationError } from '../types'
 import { functionError, isRecord } from './functionErrors'
 
@@ -73,47 +73,4 @@ export async function performCheckout(payload: CheckoutPayload): Promise<Checkou
   }
 
   return readOrder(data.order)
-}
-
-export async function getOrderConfirmation(orderId: string): Promise<OrderConfirmation | null> {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('id, status, total, coupon_code, shipping_method, payment_method, created_at')
-    .eq('id', orderId)
-    .maybeSingle()
-
-  if (error) {
-    throw new CheckoutOperationError('order_unavailable', 'No pudimos cargar la confirmación del pedido.')
-  }
-
-  const row: unknown = data
-
-  if (!row) return null
-
-  if (!isRecord(row)) {
-    throw new CheckoutOperationError('invalid_response', 'El servidor devolvió una confirmación inválida.')
-  }
-
-  const total = readNumber(row.total)
-
-  if (
-    typeof row.id !== 'string'
-    || typeof row.status !== 'string'
-    || total === null
-    || typeof row.shipping_method !== 'string'
-    || typeof row.payment_method !== 'string'
-    || typeof row.created_at !== 'string'
-  ) {
-    throw new CheckoutOperationError('invalid_response', 'El servidor devolvió una confirmación incompleta.')
-  }
-
-  return {
-    id: row.id,
-    status: row.status,
-    total,
-    couponCode: typeof row.coupon_code === 'string' ? row.coupon_code : null,
-    shippingMethod: row.shipping_method,
-    paymentMethod: row.payment_method,
-    createdAt: row.created_at,
-  }
 }

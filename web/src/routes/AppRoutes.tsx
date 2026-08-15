@@ -7,6 +7,8 @@ import { CheckoutPage } from '../features/checkout/pages/CheckoutPage'
 import { CheckoutSuccessPage } from '../features/checkout/pages/CheckoutSuccessPage'
 import { ProductDetailPage } from '../features/catalog/pages/ProductDetailPage'
 import { ProductsPage } from '../features/catalog/pages/ProductsPage'
+import { OrderDetailPage } from '../features/orders/pages/OrderDetailPage'
+import { OrdersPage } from '../features/orders/pages/OrdersPage'
 import { AdminRoute } from './AdminRoute'
 import { ForbiddenPage } from './ForbiddenPage'
 import { HomePage } from './HomePage'
@@ -16,8 +18,6 @@ import { ProtectedRoute } from './ProtectedRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
 
 const authenticatedRoutes = [
-  { path: 'orders', title: 'Mis pedidos', phase: 9, description: 'Historial de pedidos del usuario.' },
-  { path: 'orders/:id', title: 'Detalle del pedido', phase: 9, description: 'Productos y estado de un pedido.' },
   { path: 'report-bug', title: 'Reportar un bug', phase: 12, description: 'Formulario de hallazgos de testing.' },
   { path: 'my-reports', title: 'Mis reportes', phase: 12, description: 'Seguimiento de reportes enviados.' },
 ] as const
@@ -48,6 +48,8 @@ export function AppRoutes() {
           <Route path="cart" element={<CartPage />} />
           <Route path="checkout" element={<CheckoutPage />} />
           <Route path="checkout/success/:orderId" element={<CheckoutSuccessPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/:id" element={<OrderDetailPage />} />
           {authenticatedRoutes.map((route) => (
             <Route
               element={
