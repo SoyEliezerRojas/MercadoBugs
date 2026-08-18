@@ -49,7 +49,7 @@ export function CartItemRow({ item, userId }: CartItemRowProps) {
   return (
     <li className="cart-item">
       <Link aria-label={`Ver ${product.name}`} className="cart-item__image-link" to={`/products/${product.id}`}>
-        <ProductImage alt={product.name} className="cart-item__image" src={product.imageUrl} />
+        <ProductImage alt={`Foto de ${product.name}`} className="cart-item__image" src={product.imageUrl} />
       </Link>
 
       <div className="cart-item__main">

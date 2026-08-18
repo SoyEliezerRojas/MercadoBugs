@@ -64,7 +64,7 @@ export function ProductDetailPage() {
 
       <div className="product-detail__layout">
         <div className="product-detail__media">
-          <ProductImage alt={product.name} className="product-detail__image" eager src={product.imageUrl} />
+          <ProductImage alt={`Foto de ${product.name}`} className="product-detail__image" eager src={product.imageUrl} />
         </div>
 
         <div className="product-detail__content">

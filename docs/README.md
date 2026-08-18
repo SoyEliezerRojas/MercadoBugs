@@ -12,5 +12,6 @@ Documentation will be expanded alongside the implementation:
 - `checkout.md` documents coupons, atomic checkout, Phase 11 deviations, concurrency, and rollback.
 - `orders.md` documents order history, detail snapshots, ownership, and Phase 9 baselines.
 - `bugs.md` documents the protected known-bug catalog and the correct Phase 10 baselines.
+- `image-sources.md` records the source, author, and license for every local product photograph.
 
 Keeping these documents phase-aligned prevents them from describing behavior that does not yet exist.

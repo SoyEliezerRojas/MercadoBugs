@@ -7,10 +7,25 @@ interface ProductImageProps {
   src: string | null
 }
 
+function resolveImageUrl(src: string | null) {
+  const normalizedSrc = src?.trim()
+
+  if (!normalizedSrc) {
+    return null
+  }
+
+  if (/^(?:https?:)?\/\//i.test(normalizedSrc) || /^(?:blob|data):/i.test(normalizedSrc)) {
+    return normalizedSrc
+  }
+
+  return `${import.meta.env.BASE_URL}${normalizedSrc.replace(/^\/+/, '')}`
+}
+
 export function ProductImage({ alt, className = '', eager = false, src }: ProductImageProps) {
+  const resolvedSrc = resolveImageUrl(src)
   const [failedSrc, setFailedSrc] = useState<string | null>(null)
 
-  if (!src || failedSrc === src) {
+  if (!resolvedSrc || failedSrc === resolvedSrc) {
     return (
       <div aria-label={`Imagen no disponible para ${alt}`} className={`product-image-fallback ${className}`} role="img">
         <span aria-hidden="true">MB</span>
@@ -24,9 +39,10 @@ export function ProductImage({ alt, className = '', eager = false, src }: Produc
       alt={alt}
       className={className}
       decoding="async"
+      fetchPriority={eager ? 'high' : 'auto'}
       loading={eager ? 'eager' : 'lazy'}
-      onError={() => setFailedSrc(src)}
-      src={src}
+      onError={() => setFailedSrc(resolvedSrc)}
+      src={resolvedSrc}
     />
   )
 }
