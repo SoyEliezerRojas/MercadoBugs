@@ -19,14 +19,8 @@ import { PhasePlaceholderPage } from './PhasePlaceholderPage'
 import { ProtectedRoute } from './ProtectedRoute'
 import { PublicOnlyRoute } from './PublicOnlyRoute'
 
-const authenticatedRoutes = [
-  { path: 'report-bug', title: 'Reportar un bug', phase: 12, description: 'Formulario de hallazgos de testing.' },
-  { path: 'my-reports', title: 'Mis reportes', phase: 12, description: 'Seguimiento de reportes enviados.' },
-] as const
-
 const adminRoutes = [
   { path: 'admin/users', title: 'Usuarios', phase: 13, description: 'Consulta administrativa de testers.' },
-  { path: 'admin/reports', title: 'Revisión de reportes', phase: 13, description: 'Clasificación manual de hallazgos.' },
 ] as const
 
 const AdminHomePage = lazy(() => import('../features/admin/pages/AdminHomePage').then((module) => ({
@@ -64,19 +58,6 @@ export function AppRoutes() {
           <Route path="checkout/success/:orderId" element={<CheckoutSuccessPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:id" element={<OrderDetailPage />} />
-          {authenticatedRoutes.map((route) => (
-            <Route
-              element={
-                <PhasePlaceholderPage
-                  description={route.description}
-                  phase={route.phase}
-                  title={route.title}
-                />
-              }
-              key={route.path}
-              path={route.path}
-            />
-          ))}
         </Route>
 
         <Route element={<AdminRoute />}>

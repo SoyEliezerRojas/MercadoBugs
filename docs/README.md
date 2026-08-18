@@ -2,6 +2,7 @@
 
 Documentation will be expanded alongside the implementation:
 
+- `analisis-funcional.md` is the tester-facing specification of expected application behavior.
 - `architecture.md` describes the local frontend-to-Supabase topology.
 - `database.md` documents the versioned e-commerce schema and integrity decisions.
 - `authentication.md` documents Supabase Auth, profiles, roles, and route boundaries.

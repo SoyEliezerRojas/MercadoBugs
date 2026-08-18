@@ -84,8 +84,6 @@ accidental exposure in the UX but are not authorization controls.
   API.
 - Keep ownership columns indexed. The current cart, order, and foreign-key indexes support the
   policy predicates used in this phase.
-- The application has no bug-report tables yet; they will receive their own policies when their
-  schema is introduced.
 
 The general policies are defined by the Phase 5 migration; the Phase 10 migration owns the
 `bug_definitions` policy. Both are recreated by `npm run supabase:reset`.

@@ -2,8 +2,7 @@
 
 Phase 3 defines the correct base e-commerce model. Phase 4 adds authentication automation, Phase 5
 adds RLS to every current public table, Phase 8 adds transactional checkout, Phase 10 adds the
-administrative known-bug catalog, and Phase 11 enables its five controlled behaviors. The schema
-still contains no reports.
+administrative known-bug catalog, and Phase 11 enables its five controlled behaviors.
 
 ## Relationships
 
@@ -129,5 +128,5 @@ idempotency design.
 ## Seed data
 
 `supabase/seed.sql` contains seven categories, forty fictional products, and four coupons. It does
-not create Auth users, profiles, carts, orders, reports, or admins. Known bugs are structural
+not create Auth users, profiles, carts, orders, or admins. Known bugs are structural
 laboratory data and are inserted exactly once by their versioned Phase 10 migration.
